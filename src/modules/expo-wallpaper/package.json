@@ -1,0 +1,6 @@
+{
+  "name": "expo-wallpaper",
+  "version": "1.0.0",
+  "main": "src/ExpoWallpaperModule.ts",
+  "private": true
+}

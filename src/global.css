@@ -1,9 +1,92 @@
-:root {
-  --font-display:
-    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Segoe UI Symbol, Noto Color Emoji;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+@import "nativewind/theme";
+
+@layer theme {
+  :root {
+    /* LIGHT */
+
+    --background: 248 248 248;
+    --card: 255 255 255;
+    --popover: 255 255 255;
+
+    --foreground: 100 100 100;
+    --muted-foreground: 145 145 145;
+
+    --border: 225 225 225;
+    --input: 225 225 225;
+
+    --ring: 255 230 0;
+
+    --primary: 255 230 0;
+    --primary-foreground: 55 55 55;
+
+    --accent: 255 230 0;
+    --accent-foreground: 55 55 55;
+
+    --secondary: 238 238 238;
+    --secondary-foreground: 100 100 100;
+
+    --muted: 238 238 238;
+
+    --destructive: 220 70 70;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* DARK */
+
+      --background: 10 10 10;
+      --card: 23 23 23;
+      --popover: 36 36 36;
+
+      --foreground: 255 255 255;
+      --muted-foreground: 163 163 163;
+
+      --border: 46 46 46;
+      --input: 46 46 46;
+
+      --ring: 255 230 0;
+
+      --primary: 255 230 0;
+      --primary-foreground: 0 0 0;
+
+      --accent: 255 230 0;
+      --accent-foreground: 0 0 0;
+
+      --secondary: 36 36 36;
+      --secondary-foreground: 255 255 255;
+
+      --muted: 36 36 36;
+
+      --destructive: 255 180 171;
+    }
+  }
+}
+
+@theme inline {
+  --color-background: rgb(var(--background));
+  --color-card: rgb(var(--card));
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--foreground));
+
+  --color-foreground: rgb(var(--foreground));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+
+  --color-muted: rgb(var(--muted));
+  --color-destructive: rgb(var(--destructive));
+
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-ring: rgb(var(--ring));
 }

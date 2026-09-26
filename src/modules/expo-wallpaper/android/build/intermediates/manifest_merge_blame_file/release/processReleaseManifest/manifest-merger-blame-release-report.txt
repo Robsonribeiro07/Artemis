@@ -1,0 +1,32 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="expo.modules.wallpaper" >
+4
+5    <uses-sdk android:minSdkVersion="24" />
+6
+7    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+7-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:5:5-6:59
+7-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:6:9-56
+8
+9    <application>
+9-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:8:5-22:19
+10        <provider
+10-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:10:9-20:20
+11            android:name="androidx.core.content.FileProvider"
+11-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:11:13-62
+12            android:authorities="${applicationId}.expo-wallpaper.fileprovider"
+12-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:12:13-79
+13            android:exported="false"
+13-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:13:13-37
+14            android:grantUriPermissions="true" >
+14-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:14:13-47
+15            <meta-data
+15-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:16:13-18:54
+16                android:name="android.support.FILE_PROVIDER_PATHS"
+16-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:17:17-67
+17                android:resource="@xml/file_paths" />
+17-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:18:17-51
+18        </provider>
+19    </application>
+20
+21</manifest>
