@@ -71,7 +71,7 @@ export function SeparatorCategories({
               variant="explore"
               category={item.category}
               key={item._id}
-              imageUrl={item.thumbnailUrl}
+              imageUrl={item.portraitUrl}
               thumbnailUrl={item.thumbnailUrl}
               isDownloaded={isDownloaded(item.imageUrl)}
               downloadedUri={getDownloadedUri(item.imageUrl)}

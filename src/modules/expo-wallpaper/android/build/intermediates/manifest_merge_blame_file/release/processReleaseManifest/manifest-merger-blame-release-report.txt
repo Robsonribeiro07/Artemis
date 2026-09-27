@@ -12,8 +12,8 @@
 9-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:8:5-22:19
 10        <provider
 10-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:10:9-20:20
-11            android:name="androidx.core.content.FileProvider"
-11-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:11:13-62
+11            android:name="expo.modules.wallpaper.WallpaperFileProvider"
+11-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:11:13-72
 12            android:authorities="${applicationId}.expo-wallpaper.fileprovider"
 12-->/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:12:13-79
 13            android:exported="false"

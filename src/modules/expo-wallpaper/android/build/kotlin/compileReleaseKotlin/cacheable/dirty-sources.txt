@@ -1,0 +1,8 @@
+/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/java/expo/modules/wallpaper/WallpaperFileProvider.kt
+/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/java/expo/modules/wallpaper/WallpaperDownloader.kt
+/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/java/expo/modules/wallpaper/DownloadProgressController.kt
+/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/java/expo/modules/wallpaper/WallpaperEditor.kt
+/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/java/expo/modules/wallpaper/ExpoWallpaperModule.kt
+/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/java/expo/modules/wallpaper/WallpaperResizer.kt
+/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/java/expo/modules/wallpaper/WallpaperCache.kt
+/home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/java/expo/modules/wallpaper/WallpaperModels.kt

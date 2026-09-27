@@ -32,7 +32,7 @@ export function ContainerExplorer() {
 
     const timeout = setTimeout(() => {
       setIsFiltering(false);
-    }, 800);
+    }, 300);
 
     return () => clearTimeout(timeout);
   }, [filterInput]);
@@ -64,10 +64,10 @@ export function ContainerExplorer() {
       data={displayedCategories}
       keyExtractor={(item, index) => `${item.category}-${index}`}
       showsVerticalScrollIndicator={false}
-      initialNumToRender={1}
+      initialNumToRender={4}
       maxToRenderPerBatch={4}
-      windowSize={3}
-      updateCellsBatchingPeriod={32}
+      windowSize={5}
+      updateCellsBatchingPeriod={12}
       removeClippedSubviews={true}
       contentContainerStyle={{
         paddingBottom: 24,

@@ -12,7 +12,7 @@ ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/sr
 		ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:6:9-56
 application
 ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:8:5-22:19
-provider#androidx.core.content.FileProvider
+provider#expo.modules.wallpaper.WallpaperFileProvider
 ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:10:9-20:20
 	android:grantUriPermissions
 		ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:14:13-47
@@ -21,7 +21,7 @@ ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/sr
 	android:exported
 		ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:13:13-37
 	android:name
-		ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:11:13-62
+		ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:11:13-72
 meta-data#android.support.FILE_PROVIDER_PATHS
 ADDED from /home/robson/Documentos/Artemis/src/modules/expo-wallpaper/android/src/main/AndroidManifest.xml:16:13-18:54
 	android:resource

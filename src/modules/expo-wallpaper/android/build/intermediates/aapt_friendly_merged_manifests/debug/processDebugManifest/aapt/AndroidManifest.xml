@@ -8,7 +8,7 @@
 
     <application>
         <provider
-            android:name="androidx.core.content.FileProvider"
+            android:name="expo.modules.wallpaper.WallpaperFileProvider"
             android:authorities="dollar_openBracket_applicationId_closeBracket.expo-wallpaper.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true" >

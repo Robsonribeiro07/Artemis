@@ -25,8 +25,6 @@ export function useWallpaperActions() {
 
         addDownloadedWallpaper(imageUrl, result.uri);
       } catch (error) {
-        console.error("Erro ao baixar wallpaper:", error);
-
         setStateModal(false);
       }
     },

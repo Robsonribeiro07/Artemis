@@ -1,12 +1,10 @@
 import React, { useMemo } from "react";
 import { FlatList, useWindowDimensions, View } from "react-native";
 import Animated, {
-  Extrapolation,
-  interpolate,
   useAnimatedScrollHandler,
-  useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import { Indicator } from "./indicator-carousel";
 
 type CarouselGrid = {
   rows: number;
@@ -53,27 +51,12 @@ export function Carousel<T>({
   grid,
 }: CarouselProps<T>) {
   const scrollX = useSharedValue(0);
-
   const { height } = useWindowDimensions();
-
-  const isGrid = !!grid;
-
-  /*
-   * Quantos itens existem em cada página.
-   *
-   * Normal:
-   * 1 item
-   *
-   * 2x2:
-   * 4 itens
-   */
   const itemsPerPage = grid ? grid.rows * grid.columns : 1;
-
   const pages = useMemo(() => {
     if (!grid) {
       return data.map((item) => [item]);
     }
-
     const result: T[][] = [];
 
     for (let i = 0; i < data.length; i += itemsPerPage) {
@@ -83,11 +66,6 @@ export function Carousel<T>({
     return result;
   }, [data, grid, itemsPerPage]);
 
-  /*
-   * A distância entre páginas.
-   *
-   * No grid a página inteira ocupa itemWidth.
-   */
   const interval = itemWidth;
 
   const snapOffsets = pages.map((_, index) => index * interval);
@@ -123,7 +101,7 @@ export function Carousel<T>({
         scrollEventThrottle={16}
         initialNumToRender={1}
         maxToRenderPerBatch={3}
-        windowSize={5}
+        windowSize={3}
         onScroll={handleScroll}
         onMomentumScrollEnd={handleScrollEnd}
         keyExtractor={(_, index) => index.toString()}
@@ -221,11 +199,6 @@ export function Carousel<T>({
             );
           }
 
-          /*
-           * ==================================
-           * CAROUSEL NORMAL
-           * ==================================
-           */
           return (
             <View
               style={{
@@ -251,49 +224,5 @@ export function Carousel<T>({
         </View>
       )}
     </>
-  );
-}
-
-type IndicatorProps = {
-  index: number;
-  scrollX: Animated.SharedValue<number>;
-  interval: number;
-};
-
-function Indicator({ index, scrollX, interval }: IndicatorProps) {
-  const animatedStyle = useAnimatedStyle(() => {
-    const position = scrollX.value / interval;
-
-    const width = interpolate(
-      position,
-      [index - 1, index, index + 1],
-      [8, 24, 8],
-      Extrapolation.CLAMP,
-    );
-
-    const opacity = interpolate(
-      position,
-      [index - 1, index, index + 1],
-      [0.45, 1, 0.45],
-      Extrapolation.CLAMP,
-    );
-
-    return {
-      width,
-      opacity,
-    };
-  });
-
-  return (
-    <Animated.View
-      style={[
-        {
-          height: 8,
-          borderRadius: 999,
-        },
-        animatedStyle,
-      ]}
-      className="bg-primary"
-    />
   );
 }

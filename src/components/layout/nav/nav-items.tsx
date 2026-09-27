@@ -91,7 +91,7 @@ export function NavItems({ item }: NavItemsProps) {
 
   return (
     <Pressable
-      onPress={() => router.push(route)}
+      onPress={() => router.navigate(route)}
       className="w-10 h-10 items-center justify-center"
     >
       <Animated.View

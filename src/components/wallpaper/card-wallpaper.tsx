@@ -27,14 +27,8 @@ function CardWallpaper({
 }: FeaturedCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  console.log("thumbnail:", thumbnailUrl);
-
   return (
     <Box className="relative h-full w-full overflow-hidden rounded-2xl">
-      {!imageLoaded && (
-        <Skeleton className="absolute inset-0 h-full w-full rounded-2xl" />
-      )}
-
       <Image
         source={thumbnailUrl}
         style={{
@@ -43,17 +37,24 @@ function CardWallpaper({
           right: 0,
           bottom: 0,
           left: 0,
+          opacity: imageLoaded ? 1 : 0,
         }}
         contentFit="cover"
         allowDownscaling
         cachePolicy="memory-disk"
         onLoad={() => {
-          setImageLoaded(true);
+          setTimeout(() => {
+            setImageLoaded(true);
+          }, 100);
         }}
-        onError={(error) => {
+        onError={() => {
           setImageLoaded(true);
         }}
       />
+
+      {!imageLoaded && (
+        <Skeleton className="absolute inset-0 h-full w-full rounded-2xl" />
+      )}
 
       <Box className="absolute inset-0">
         <FeaturedDetails
