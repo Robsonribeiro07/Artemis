@@ -2,7 +2,7 @@ import { usePathname, useRouter } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-worklets";
 
-const routes = ["/home", "/search", "/favorites", "/profile"] as const;
+const routes = ["/", "/explore", "/favorites", "/profile"] as const;
 
 export function SwipeContainer({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,7 +15,7 @@ export function SwipeContainer({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    router.replace(routes[index]);
+    router.navigate(routes[index]);
   };
 
   const gesture = Gesture.Pan()

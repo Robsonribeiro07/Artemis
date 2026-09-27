@@ -212,7 +212,7 @@ export function Carousel<T>({
       />
 
       {!withoutIndicator && (
-        <View className="mt-4 flex-row justify-center gap-2">
+        <View className=" flex-row justify-center gap-2">
           {pages.map((_, index) => (
             <Indicator
               key={index}

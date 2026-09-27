@@ -3,6 +3,7 @@ import CardWallpaper from "@/components/wallpaper/card-wallpaper";
 import { SkeletonWallpaper } from "@/components/wallpaper/skeleton-wallpaper";
 import { useWallpaperActions } from "@/hooks/wallapapers/use-wallpaper-actions";
 import { useState } from "react";
+
 import { useWindowDimensions } from "react-native";
 
 export function FeaturedCarousel() {

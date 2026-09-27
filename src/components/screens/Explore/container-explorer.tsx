@@ -1,9 +1,8 @@
 // ContainerExplorer.tsx
 
-import { SkeletonExplorer } from "@/components/wallpaper/skeleton-explorer";
 import { useWallpaperActions } from "@/hooks/wallapapers/use-wallpaper-actions";
-import { useWallpaperStore } from "@/store/wallpapers/use-wallpapers-store";
-import { useEffect, useMemo, useState } from "react";
+import { useAllWallpaperForCategoryStore } from "@/store/wallpapers/use-state-all-walpaper-explorer";
+import { useMemo } from "react";
 import { FlatList, View } from "react-native";
 import { SeparatorCategories } from "./separator-categories";
 
@@ -16,28 +15,9 @@ export function ContainerExplorer() {
     getDownloadedUri,
   } = useWallpaperActions();
 
-  const { filterInput } = useWallpaperStore();
+  const { category } = useAllWallpaperForCategoryStore();
 
-  const [isFiltering, setIsFiltering] = useState(false);
-
-  useEffect(() => {
-    const normalizedFilter = filterInput.trim();
-
-    if (!normalizedFilter) {
-      setIsFiltering(false);
-      return;
-    }
-
-    setIsFiltering(true);
-
-    const timeout = setTimeout(() => {
-      setIsFiltering(false);
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [filterInput]);
-
-  const normalizedFilter = filterInput.trim().toLocaleLowerCase();
+  const normalizedFilter = category.trim().toLocaleLowerCase();
 
   const categories = data?.categories ?? [];
 
@@ -51,10 +31,6 @@ export function ContainerExplorer() {
     );
   }, [categories, normalizedFilter]);
 
-  if (isFiltering) {
-    return <SkeletonExplorer />;
-  }
-
   if (!data) {
     return null;
   }
@@ -64,7 +40,7 @@ export function ContainerExplorer() {
       data={displayedCategories}
       keyExtractor={(item, index) => `${item.category}-${index}`}
       showsVerticalScrollIndicator={false}
-      initialNumToRender={4}
+      initialNumToRender={1}
       maxToRenderPerBatch={4}
       windowSize={5}
       updateCellsBatchingPeriod={12}

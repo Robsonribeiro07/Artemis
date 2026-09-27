@@ -38,18 +38,24 @@ export function SeparatorCategories({
   return (
     <Box
       style={{
-        width: "100%",
+        minWidth: "100%",
       }}
     >
       <TouchableOpacity
-        className="justify-between flex-row items-center "
+        className="flex-row items-center relative"
         onPress={() => openCategory(category)}
       >
         <ThemedText size="lg" weight="bold" className="mt-3">
           {category.toLocaleUpperCase()}
         </ThemedText>
 
-        <ChevronRight color="white" />
+        <ChevronRight
+          color="white"
+          style={{
+            position: "absolute",
+            right: 0,
+          }}
+        />
       </TouchableOpacity>
       <View
         style={{

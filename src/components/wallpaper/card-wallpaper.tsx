@@ -45,7 +45,7 @@ function CardWallpaper({
         onLoad={() => {
           setTimeout(() => {
             setImageLoaded(true);
-          }, 100);
+          }, 300);
         }}
         onError={() => {
           setImageLoaded(true);

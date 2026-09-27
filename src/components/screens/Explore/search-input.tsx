@@ -1,11 +1,11 @@
 import { Input, InputField } from "@/components/ui/input";
-import { useWallpaperStore } from "@/store/wallpapers/use-wallpapers-store";
+import { useAllWallpaperForCategoryStore } from "@/store/wallpapers/use-state-all-walpaper-explorer";
 
 export function SearchInput() {
-  const { setFilterInput } = useWallpaperStore();
+  const { setCategory } = useAllWallpaperForCategoryStore();
   return (
     <Input className="rounded-2xl">
-      <InputField placeholder="Animes" onChangeText={setFilterInput} />
+      <InputField placeholder="Animes" onChangeText={setCategory} />
     </Input>
   );
 }

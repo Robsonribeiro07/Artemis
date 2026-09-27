@@ -40,7 +40,7 @@ export function Indicator({ index, scrollX, interval }: IndicatorProps) {
           width: 8,
           height: 8,
           borderRadius: 999,
-          backgroundColor: "red",
+          backgroundColor: "#FFE600",
         },
         animatedStyle,
       ]}
