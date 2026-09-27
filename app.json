@@ -35,7 +35,8 @@
       ],
       "expo-font",
       "@lottiefiles/dotlottie-react-native/plugin",
-      "expo-audio"
+      "expo-audio",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

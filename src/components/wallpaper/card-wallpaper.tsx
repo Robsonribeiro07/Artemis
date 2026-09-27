@@ -1,58 +1,67 @@
 import { Box } from "@/components/ui/box";
-import { memo } from "react";
-import { Image } from "react-native";
-
-import ExpoWallpaperModule from "@/modules/expo-wallpaper/src/ExpoWallpaperModule";
-import { useWallpaperStore } from "@/store/wallpapers/use-wallpapers-store";
-import { IWallpaperResponse } from "@/utils/useErrorHandler";
-import { FeaturedDetails } from "../home/featured/featured-details";
-
+import { Skeleton } from "@/components/ui/skeleton";
+import { Image } from "expo-image";
+import { memo, useState } from "react";
+import { FeaturedDetails } from "../screens/Home/featured/featured-details";
 type FeaturedCardProps = {
-  wallpaper: IWallpaperResponse;
-  isDowloaded: boolean;
-  dowloadedUri: string | undefined;
-  onDownloaded: (imageUrl: string, uri: string) => void;
+  isDownloaded: boolean;
+  downloadedUri?: string;
+  onDownload: (imageUrl: string) => void | Promise<void>;
+  onOpenDownloaded: (uri?: string) => void;
+  variant: "home" | "explore";
+  wihoutCategory?: boolean;
+  imageUrl: string;
+  category: string;
+  thumbnailUrl: string;
 };
 
 function CardWallpaper({
-  wallpaper: { imageUrl, title, tags },
-  isDowloaded,
-  dowloadedUri,
-  onDownloaded,
+  imageUrl,
+  category,
+  thumbnailUrl,
+  isDownloaded,
+  downloadedUri,
+  onDownload,
+  onOpenDownloaded,
+  wihoutCategory,
 }: FeaturedCardProps) {
-  const { setStateModal, setSelectedWallpaperUri, setBehavior } =
-    useWallpaperStore();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
-  const handleOnPressDowloadWallpaper = async () => {
-    if (!imageUrl) return;
-    setBehavior("download");
-    setStateModal(true);
-    const result = await ExpoWallpaperModule.downloadWallpaper(imageUrl);
-    onDownloaded(imageUrl, result.uri);
-  };
-
-  const handleOnPressOpenDowloadedWallpaper = () => {
-    if (!dowloadedUri) return;
-    setBehavior("apply");
-    setStateModal(true);
-    setSelectedWallpaperUri(dowloadedUri);
-  };
+  console.log("thumbnail:", thumbnailUrl);
 
   return (
     <Box className="relative h-full w-full overflow-hidden rounded-2xl">
+      {!imageLoaded && (
+        <Skeleton className="absolute inset-0 h-full w-full rounded-2xl" />
+      )}
+
       <Image
-        source={{ uri: imageUrl }}
-        className="absolute inset-0 h-full w-full"
-        resizeMode="cover"
+        source={thumbnailUrl}
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+        }}
+        contentFit="cover"
+        allowDownscaling
+        cachePolicy="memory-disk"
+        onLoad={() => {
+          setImageLoaded(true);
+        }}
+        onError={(error) => {
+          setImageLoaded(true);
+        }}
       />
 
       <Box className="absolute inset-0">
         <FeaturedDetails
-          tags={tags[0]}
-          title={title}
-          isDowloaded={isDowloaded}
-          onHandlePressDowload={handleOnPressDowloadWallpaper}
-          onHandlePressOpenEditor={handleOnPressOpenDowloadedWallpaper}
+          category={category}
+          isDowloaded={isDownloaded}
+          onHandlePressDowload={() => onDownload(imageUrl)}
+          onHandlePressOpenEditor={() => onOpenDownloaded(downloadedUri)}
+          wihoutCategory={wihoutCategory}
         />
       </Box>
     </Box>

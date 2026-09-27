@@ -1,10 +1,9 @@
 import { create } from "zustand";
 
-export type Filter = "all";
 export type BehaviorType = "apply" | "download";
 
 interface WallpaperState {
-  filter: Filter;
+  filter: string;
   filterInput: string;
   page: number;
   limit: number;
@@ -13,7 +12,7 @@ interface WallpaperState {
   selectedWallpaperUri: string | undefined;
   behavior: BehaviorType;
 
-  setFilter: (filter: Filter) => void;
+  setFilter: (filter: string) => void;
   setFilterInput: (filterInput: string) => void;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
@@ -36,10 +35,10 @@ const initialState: Omit<
   | "setBehavior"
   | "reset"
 > = {
-  filter: "all",
+  filter: "",
   filterInput: "",
   page: 1,
-  limit: 5,
+  limit: 10,
   stateModalWallpaper: false,
   selectedWallpaperUri: undefined,
   behavior: "apply",

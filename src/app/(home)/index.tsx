@@ -1,5 +1,5 @@
-import { FeaturedContainer } from "@/components/home/featured/container";
 import { Screen } from "@/components/screen";
+import { FeaturedContainer } from "@/components/screens/Home/featured/container";
 
 export default function Home() {
   return (

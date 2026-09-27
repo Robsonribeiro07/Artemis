@@ -3,7 +3,7 @@ import * as LucideIcons from "lucide-react-native";
 import { useEffect, useRef } from "react";
 import { Animated, Easing, Pressable } from "react-native";
 
-type NavItem = "home" | "search" | "favorites" | "profile";
+type NavItem = "home" | "explore" | "favorites" | "profile";
 
 type NavItemConfig = {
   icon: keyof typeof LucideIcons;
@@ -18,10 +18,10 @@ export const navItems: Record<NavItem, NavItemConfig> = {
     route: "/",
   },
 
-  search: {
+  explore: {
     icon: "Search",
     label: "Search",
-    route: "/search",
+    route: "/explore",
   },
 
   favorites: {

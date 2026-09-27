@@ -4,7 +4,7 @@ import { NavItems } from "./nav-items";
 
 const contentNavs = [
   { item: "home" },
-  { item: "search" },
+  { item: "explore" },
   { item: "favorites" },
   { item: "profile" },
 ];

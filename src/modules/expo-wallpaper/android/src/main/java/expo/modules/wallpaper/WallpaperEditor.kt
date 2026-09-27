@@ -2,290 +2,548 @@ package expo.modules.wallpaper
 
 import android.app.Activity
 import android.app.WallpaperManager
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import java.io.File
+import kotlin.math.roundToInt
 
 class WallpaperEditor(
-  private val context: Context
+    private val context: Context
 ) {
 
-  companion object {
-    private const val TAG = "ExpoWallpaperEditor"
-    private const val EDITOR_SUFFIX = "_editor.jpg"
-  }
+    companion object {
 
-  fun open(activity: Activity, sourceUri: Uri): Uri {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-      throw Exception("O editor de wallpaper exige Android 7.0 ou superior.")
+        private const val OUTPUT_SUFFIX = "_screen_fit.jpg"
+
+        private const val MAX_WIDTH = 1440
+        private const val MAX_HEIGHT = 3200
+
+        private const val JPEG_QUALITY = 95
     }
 
-    val editorUri = prepareUri(sourceUri)
-    val resolver = context.contentResolver
-    val mimeType = resolver.getType(editorUri) ?: "image/jpeg"
+    /**
+     * Prepara a imagem e aplica diretamente como wallpaper.
+     *
+     * Mantém a proporção da imagem.
+     *
+     * A imagem é cortada somente quando necessário
+     * para preencher completamente a tela.
+     */
+    fun open(
+        activity: Activity,
+        sourceUri: Uri
+    ): Uri {
 
-    if (!mimeType.startsWith("image/")) {
-      throw Exception("MIME inválido para o editor: $mimeType")
-    }
-
-    val intent = createIntent(editorUri, mimeType)
-
-    val resolverInfo = intent.resolveActivity(context.packageManager)
-      ?: throw Exception(
-        "Nenhum editor de wallpaper compatível foi encontrado. MIME: $mimeType"
-      )
-
-    val packageName = resolverInfo.packageName
-
-    try {
-      context.grantUriPermission(
-        packageName,
-        editorUri,
-        Intent.FLAG_GRANT_READ_URI_PERMISSION
-      )
-
-      context.grantUriPermission(
-        packageName,
-        editorUri,
-        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-      )
-    } catch (error: Exception) {
-      Log.w(
-        TAG,
-        "Não foi possível conceder permissão explícita.",
-        error
-      )
-    }
-
-    try {
-      activity.startActivity(intent)
-    } catch (error: Exception) {
-      throw Exception(
-        "Não foi possível abrir o editor de wallpaper: ${error.message}"
-      )
-    }
-
-    return editorUri
-  }
-
-  private fun prepareUri(sourceUri: Uri): Uri {
-    val sourceMimeType = context.contentResolver.getType(sourceUri)
-
-    if (
-      sourceMimeType == "image/jpeg" ||
-      sourceMimeType == "image/jpg"
-    ) {
-      return sourceUri
-    }
-
-    val directory = File(context.filesDir, "wallpapers")
-
-    if (!directory.exists() && !directory.mkdirs()) {
-      throw Exception(
-        "Não foi possível criar o diretório de wallpapers."
-      )
-    }
-
-    val editorId = sha256(sourceUri.toString())
-    val editorFile = File(
-      directory,
-      "$editorId$EDITOR_SUFFIX"
-    )
-
-    if (
-      editorFile.exists() &&
-      editorFile.length() > 0L
-    ) {
-      val existingUri =
-        WallpaperFileProvider.uri(
-          context,
-          editorFile
-        )
-
-      if (
-        context.contentResolver.getType(existingUri) ==
-        "image/jpeg"
-      ) {
-        return existingUri
-      }
-
-      try {
-        editorFile.delete()
-      } catch (_: Exception) {
-      }
-    }
-
-    val bitmap =
-      context.contentResolver
-        .openInputStream(sourceUri)
-        .use { input ->
-          if (input == null) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             throw Exception(
-              "Não foi possível abrir a URI do wallpaper."
+                "O Android 7.0 ou superior é necessário."
             )
-          }
-
-          BitmapFactory.decodeStream(input)
         }
-        ?: throw Exception(
-          "Não foi possível decodificar a imagem do wallpaper."
+
+        val wallpaperUri =
+            prepareScreenFitImage(sourceUri)
+
+        applyWallpaper(
+            wallpaperUri
         )
 
-    try {
-      editorFile.outputStream().use { output ->
+        return wallpaperUri
+    }
+
+    /**
+     * ================================================================
+     * PREPARAR IMAGEM
+     * ================================================================
+     */
+    private fun prepareScreenFitImage(
+        sourceUri: Uri
+    ): Uri {
+
+        val directory =
+            File(
+                context.filesDir,
+                "wallpapers"
+            )
+
         if (
-          !bitmap.compress(
-            Bitmap.CompressFormat.JPEG,
-            95,
-            output
-          )
+            !directory.exists() &&
+            !directory.mkdirs()
         ) {
-          throw Exception(
-            "Não foi possível converter a imagem para JPEG."
-          )
+            throw Exception(
+                "Não foi possível criar o diretório de wallpapers."
+            )
         }
-      }
-    } catch (error: Exception) {
-      try {
-        editorFile.delete()
-      } catch (_: Exception) {
-      }
 
-      throw error
-    } finally {
-      bitmap.recycle()
+        /*
+         * ============================================================
+         * TAMANHO REAL DA TELA
+         * ============================================================
+         */
+
+        val metrics =
+            context.resources.displayMetrics
+
+        val screenWidth =
+            metrics.widthPixels
+                .coerceAtLeast(1)
+
+        val screenHeight =
+            metrics.heightPixels
+                .coerceAtLeast(1)
+
+        /*
+         * Limita apenas telas absurdamente grandes.
+         *
+         * Não reduz uma tela normal.
+         */
+
+        val screenScale =
+            minOf(
+                MAX_WIDTH.toFloat() /
+                    screenWidth.toFloat(),
+
+                MAX_HEIGHT.toFloat() /
+                    screenHeight.toFloat(),
+
+                1f
+            )
+
+        val targetWidth =
+            (
+                screenWidth * screenScale
+            )
+                .roundToInt()
+                .coerceAtLeast(1)
+
+        val targetHeight =
+            (
+                screenHeight * screenScale
+            )
+                .roundToInt()
+                .coerceAtLeast(1)
+
+        /*
+         * ============================================================
+         * ID DO ARQUIVO
+         * ============================================================
+         */
+
+        val outputId =
+            sha256(
+                sourceUri.toString() +
+                    "_screen_fit_" +
+                    targetWidth +
+                    "x" +
+                    targetHeight
+            )
+
+        val outputFile =
+            File(
+                directory,
+                "$outputId$OUTPUT_SUFFIX"
+            )
+
+        /*
+         * Reutiliza arquivo já preparado.
+         */
+
+        if (
+            outputFile.exists() &&
+            outputFile.length() > 0L
+        ) {
+            return WallpaperFileProvider.uri(
+                context,
+                outputFile
+            )
+        }
+
+        /*
+         * ============================================================
+         * DESCOBRIR TAMANHO ORIGINAL
+         * ============================================================
+         */
+
+        val bounds =
+            BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+
+        context.contentResolver
+            .openInputStream(sourceUri)
+            .use { input ->
+
+                if (input == null) {
+                    throw Exception(
+                        "Não foi possível abrir a imagem."
+                    )
+                }
+
+                BitmapFactory.decodeStream(
+                    input,
+                    null,
+                    bounds
+                )
+            }
+
+        val originalWidth =
+            bounds.outWidth
+
+        val originalHeight =
+            bounds.outHeight
+
+        if (
+            originalWidth <= 0 ||
+            originalHeight <= 0
+        ) {
+            throw Exception(
+                "Não foi possível identificar as dimensões da imagem."
+            )
+        }
+
+        /*
+         * ============================================================
+         * DECODIFICAR IMAGEM
+         * ============================================================
+         *
+         * Para aplicação do wallpaper priorizamos qualidade.
+         *
+         * Não usamos inSampleSize para evitar upscale
+         * de uma imagem previamente reduzida.
+         */
+
+        val options =
+            BitmapFactory.Options().apply {
+                inPreferredConfig =
+                    Bitmap.Config.ARGB_8888
+            }
+
+        val sourceBitmap =
+            context.contentResolver
+                .openInputStream(sourceUri)
+                .use { input ->
+
+                    if (input == null) {
+                        throw Exception(
+                            "Não foi possível abrir a imagem."
+                        )
+                    }
+
+                    BitmapFactory.decodeStream(
+                        input,
+                        null,
+                        options
+                    )
+                }
+                ?: throw Exception(
+                    "Não foi possível decodificar a imagem."
+                )
+
+        try {
+
+            /*
+             * ========================================================
+             * PREPARAR PARA A TELA
+             * ========================================================
+             */
+
+            val fittedBitmap =
+                createCenterCrop(
+                    sourceBitmap,
+                    targetWidth,
+                    targetHeight
+                )
+
+            try {
+
+                /*
+                 * ====================================================
+                 * SALVAR
+                 * ====================================================
+                 */
+
+                outputFile
+                    .outputStream()
+                    .use { output ->
+
+                        val success =
+                            fittedBitmap.compress(
+                                Bitmap.CompressFormat.JPEG,
+                                JPEG_QUALITY,
+                                output
+                            )
+
+                        if (!success) {
+                            throw Exception(
+                                "Não foi possível salvar o wallpaper."
+                            )
+                        }
+                    }
+
+            } catch (error: Exception) {
+
+                try {
+                    outputFile.delete()
+                } catch (_: Exception) {
+                }
+
+                throw error
+
+            } finally {
+
+                if (
+                    fittedBitmap !== sourceBitmap &&
+                    !fittedBitmap.isRecycled
+                ) {
+                    fittedBitmap.recycle()
+                }
+            }
+
+        } finally {
+
+            if (!sourceBitmap.isRecycled) {
+                sourceBitmap.recycle()
+            }
+        }
+
+        /*
+         * ============================================================
+         * VALIDAR
+         * ============================================================
+         */
+
+        if (
+            !outputFile.exists() ||
+            outputFile.length() <= 0L
+        ) {
+            throw Exception(
+                "O wallpaper preparado não foi criado corretamente."
+            )
+        }
+
+        /*
+         * Verifica dimensões finais.
+         */
+
+        val finalBounds =
+            BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+
+        BitmapFactory.decodeFile(
+            outputFile.absolutePath,
+            finalBounds
+        )
+
+        if (
+            finalBounds.outWidth != targetWidth ||
+            finalBounds.outHeight != targetHeight
+        ) {
+
+            outputFile.delete()
+
+            throw Exception(
+                "Dimensões finais inválidas. " +
+                    "Esperado ${targetWidth}x${targetHeight}, " +
+                    "obtido ${finalBounds.outWidth}x${finalBounds.outHeight}."
+            )
+        }
+
+        return WallpaperFileProvider.uri(
+            context,
+            outputFile
+        )
     }
 
-    if (
-      !editorFile.exists() ||
-      editorFile.length() <= 0L
+    /**
+     * ================================================================
+     * CENTER CROP
+     * ================================================================
+     *
+     * Mantém a proporção.
+     *
+     * Preenche 100% da tela.
+     *
+     * Corta somente o excesso necessário.
+     *
+     * Não deforma a imagem.
+     */
+    private fun createCenterCrop(
+        source: Bitmap,
+        targetWidth: Int,
+        targetHeight: Int
+    ): Bitmap {
+
+        val sourceWidth =
+            source.width
+
+        val sourceHeight =
+            source.height
+
+        if (
+            sourceWidth == targetWidth &&
+            sourceHeight == targetHeight
+        ) {
+            return source
+        }
+
+        /*
+         * ============================================================
+         * ESCALA
+         * ============================================================
+         *
+         * Usamos MAX para garantir que os dois lados
+         * preencham completamente o destino.
+         */
+
+        val scale =
+            maxOf(
+                targetWidth.toFloat() /
+                    sourceWidth.toFloat(),
+
+                targetHeight.toFloat() /
+                    sourceHeight.toFloat()
+            )
+
+        val scaledWidth =
+            (
+                sourceWidth * scale
+            )
+                .roundToInt()
+                .coerceAtLeast(targetWidth)
+
+        val scaledHeight =
+            (
+                sourceHeight * scale
+            )
+                .roundToInt()
+                .coerceAtLeast(targetHeight)
+
+        /*
+         * ============================================================
+         * RESIZE
+         * ============================================================
+         */
+
+        val scaled =
+            Bitmap.createScaledBitmap(
+                source,
+                scaledWidth,
+                scaledHeight,
+                true
+            )
+
+        /*
+         * ============================================================
+         * CROP CENTRAL
+         * ============================================================
+         */
+
+        val left =
+            ((scaledWidth - targetWidth) / 2)
+                .coerceAtLeast(0)
+
+        val top =
+            ((scaledHeight - targetHeight) / 2)
+                .coerceAtLeast(0)
+
+        val cropped =
+            Bitmap.createBitmap(
+                scaled,
+                left,
+                top,
+                targetWidth,
+                targetHeight
+            )
+
+        /*
+         * scaled não é mais necessário.
+         */
+
+        if (
+            cropped !== scaled &&
+            !scaled.isRecycled
+        ) {
+            scaled.recycle()
+        }
+
+        return cropped
+    }
+
+    /**
+     * ================================================================
+     * APLICAR WALLPAPER
+     * ================================================================
+     */
+    private fun applyWallpaper(
+        uri: Uri
     ) {
-      throw Exception(
-        "O JPEG preparado para o editor não foi criado corretamente."
-      )
+
+        val wallpaperManager =
+            WallpaperManager.getInstance(
+                context
+            )
+
+        val resolver =
+            context.contentResolver
+
+        resolver
+            .openInputStream(uri)
+            .use { input ->
+
+                if (input == null) {
+                    throw Exception(
+                        "Não foi possível abrir o wallpaper preparado."
+                    )
+                }
+
+                if (
+                    Build.VERSION.SDK_INT >=
+                    Build.VERSION_CODES.N
+                ) {
+
+                    wallpaperManager.setStream(
+                        input,
+                        null,
+                        true,
+                        WallpaperManager.FLAG_SYSTEM or
+                            WallpaperManager.FLAG_LOCK
+                    )
+
+                } else {
+
+                    wallpaperManager.setStream(
+                        input
+                    )
+                }
+            }
     }
 
-    val editorUri =
-      WallpaperFileProvider.uri(
-        context,
-        editorFile
-      )
+    /**
+     * ================================================================
+     * SHA-256
+     * ================================================================
+     */
+    private fun sha256(
+        value: String
+    ): String {
 
-    val editorMimeType =
-      context.contentResolver.getType(editorUri)
+        val digest =
+            java.security.MessageDigest
+                .getInstance("SHA-256")
 
-    if (editorMimeType != "image/jpeg") {
-      try {
-        editorFile.delete()
-      } catch (_: Exception) {
-      }
+        val bytes =
+            digest.digest(
+                value.toByteArray(
+                    Charsets.UTF_8
+                )
+            )
 
-      throw Exception(
-        "O FileProvider retornou MIME inválido para o JPEG: $editorMimeType"
-      )
-    }
-
-    return editorUri
-  }
-
-  private fun createIntent(
-    uri: Uri,
-    mimeType: String
-  ): Intent {
-    return try {
-      WallpaperManager
-        .getInstance(context)
-        .getCropAndSetWallpaperIntent(uri)
-        .apply {
-          configureIntent(
-            this,
-            uri,
-            mimeType
-          )
+        return bytes.joinToString("") {
+            "%02x".format(it)
         }
-    } catch (error: Exception) {
-      Log.e(
-        TAG,
-        "getCropAndSetWallpaperIntent falhou.",
-        error
-      )
-
-      Intent(
-        WallpaperManager.ACTION_CROP_AND_SET_WALLPAPER
-      ).apply {
-        configureIntent(
-          this,
-          uri,
-          mimeType
-        )
-
-        val activities =
-          context.packageManager.queryIntentActivities(
-            this,
-            0
-          )
-
-        if (activities.isEmpty()) {
-          throw Exception(
-            "O Android não encontrou um editor de wallpaper compatível. " +
-              "MIME: $mimeType. " +
-              "Erro original: ${error.message}"
-          )
-        }
-      }
     }
-  }
-
-  private fun configureIntent(
-    intent: Intent,
-    uri: Uri,
-    mimeType: String
-  ) {
-    intent.setDataAndType(
-      uri,
-      mimeType
-    )
-
-    intent.addFlags(
-      Intent.FLAG_GRANT_READ_URI_PERMISSION
-    )
-
-    intent.addFlags(
-      Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-    )
-
-    intent.addFlags(
-      Intent.FLAG_ACTIVITY_NEW_TASK
-    )
-
-    intent.clipData =
-      ClipData.newRawUri(
-        "wallpaper",
-        uri
-      )
-  }
-
-  private fun sha256(value: String): String {
-    val digest =
-      java.security.MessageDigest.getInstance(
-        "SHA-256"
-      )
-
-    val bytes =
-      digest.digest(
-        value.toByteArray(
-          Charsets.UTF_8
-        )
-      )
-
-    return bytes.joinToString("") {
-      "%02x".format(it)
-    }
-  }
 }

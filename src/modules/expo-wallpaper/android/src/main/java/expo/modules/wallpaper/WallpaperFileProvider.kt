@@ -7,16 +7,22 @@ import java.io.File
 
 object WallpaperFileProvider {
 
+    private const val AUTHORITY_SUFFIX =
+        ".expo-wallpaper.fileprovider"
+
+    fun authority(
+        context: Context
+    ): String {
+        return "${context.packageName}$AUTHORITY_SUFFIX"
+    }
+
     fun uri(
         context: Context,
         file: File
     ): Uri {
-        val authority =
-            "${context.packageName}.expo-wallpaper.fileprovider"
-
         return FileProvider.getUriForFile(
             context,
-            authority,
+            authority(context),
             file
         )
     }

@@ -2,11 +2,19 @@ import api from "@/lib/axios";
 import { AxiosInstance } from "axios";
 
 import {
+  getAllWallpaperForCategoryHelper,
+  IGetAllWallpapersForCategoryParams,
+} from "./helpers/get-all-wallpaper-for-category";
+import {
   getAllWallpaperHelper,
   IGetAllWallpapersParams,
 } from "./helpers/get-all-wallpaper-helper";
 
 type GetAllWallpapersParams = Omit<IGetAllWallpapersParams, "api">;
+type GetAllWallpapersForCategoryParams = Omit<
+  IGetAllWallpapersForCategoryParams,
+  "api"
+>;
 
 export class WallpaperService {
   private api: AxiosInstance;
@@ -29,13 +37,6 @@ export class WallpaperService {
     limit,
     page,
   }: GetAllWallpapersParams) {
-    console.log("PARAMS:", {
-      filter,
-      filterInput,
-      limit,
-      page,
-    });
-
     const response = await getAllWallpaperHelper({
       filter,
       filterInput,
@@ -45,5 +46,17 @@ export class WallpaperService {
     });
 
     return response;
+  }
+  async getAllWallpaperForCategory({
+    category,
+    limit,
+    page,
+  }: GetAllWallpapersForCategoryParams) {
+    return await getAllWallpaperForCategoryHelper({
+      category,
+      page,
+      limit,
+      api: this.api,
+    });
   }
 }

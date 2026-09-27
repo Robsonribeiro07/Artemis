@@ -69,12 +69,6 @@ export function Carousel<T>({
    */
   const itemsPerPage = grid ? grid.rows * grid.columns : 1;
 
-  /*
-   * No grid agrupamos os itens:
-   *
-   * [1, 2, 3, 4]
-   * [5, 6, 7, 8]
-   */
   const pages = useMemo(() => {
     if (!grid) {
       return data.map((item) => [item]);
@@ -127,6 +121,9 @@ export function Carousel<T>({
         decelerationRate="fast"
         bounces={false}
         scrollEventThrottle={16}
+        initialNumToRender={1}
+        maxToRenderPerBatch={3}
+        windowSize={5}
         onScroll={handleScroll}
         onMomentumScrollEnd={handleScrollEnd}
         keyExtractor={(_, index) => index.toString()}

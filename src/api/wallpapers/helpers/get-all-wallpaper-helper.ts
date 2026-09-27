@@ -1,47 +1,17 @@
 import { AxiosError, AxiosInstance } from "axios";
-
-export type Filter = "all";
-
+import { IGetWallpaperResponse } from "./type";
 export interface IGetAllWallpapersParams {
   api: AxiosInstance;
   page?: number;
   limit?: number;
-  filter: Filter;
+  filter: string;
   filterInput?: string;
-}
-
-export interface IWallpaperResponse {
-  _id: string;
-  title: string;
-  imageUrl: string;
-  category: string;
-  tags: string[];
-  resolution: string;
-  width: number;
-  height: number;
-  isFeatured: boolean;
-  downloads: number;
-  likes: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface IGetWallpaperResponse {
-  wallpapers: IWallpaperResponse[];
-
-  pagination: {
-    page: number;
-    limit: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-  };
 }
 
 export async function getAllWallpaperHelper({
   api,
-  filter = "all",
-  limit = 5,
+  filter = "All",
+  limit = 10,
   page = 1,
   filterInput,
 }: IGetAllWallpapersParams): Promise<IGetWallpaperResponse> {

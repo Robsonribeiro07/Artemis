@@ -15,7 +15,7 @@ export function PreviewApplyBackground() {
     if (!selectedWallpaperUri) return;
 
     await ExpoWallpaperModule.openWallpaperEditor(selectedWallpaperUri);
-  };
+  }; 
 
   const handleOnPressAddFavorite = () => {
     if (!selectedWallpaperUri) return;

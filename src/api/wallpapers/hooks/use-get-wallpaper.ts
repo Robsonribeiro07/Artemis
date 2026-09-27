@@ -10,7 +10,6 @@ export function useGetAllWallpapers() {
 
   const query = useQuery({
     queryKey: ["wallpapers", currentPage, limit, filter, filterInput],
-
     queryFn: async () => {
       const wallpapers = new WallpaperService("test");
 
@@ -21,6 +20,7 @@ export function useGetAllWallpapers() {
         limit,
       });
     },
+    refetchOnWindowFocus: false,
   });
 
   return {
