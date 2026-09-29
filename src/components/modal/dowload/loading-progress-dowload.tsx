@@ -23,7 +23,6 @@ export function LoadingProgressDowload() {
         if (!event.uri) return;
 
         setStateModal(false);
-        setProgress(0);
 
         await ExpoWallpaperModule.openWallpaperEditor(event.uri);
       },

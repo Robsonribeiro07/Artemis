@@ -30,8 +30,13 @@ class WallpaperEditor(
         requireSupportedAndroid()
 
         val wallpaperUri = prepareForEditor(sourceUri)
+
         validateWallpaperUri(wallpaperUri)
-        openSystemWallpaperEditor(activity, wallpaperUri)
+
+        openSystemWallpaperEditor(
+            activity = activity,
+            imageUri = wallpaperUri
+        )
 
         return wallpaperUri
     }
@@ -42,7 +47,9 @@ class WallpaperEditor(
         requireSupportedAndroid()
 
         val uri = prepareForEditor(sourceUri)
+
         validateWallpaperUri(uri)
+
         return uri
     }
 
@@ -59,6 +66,7 @@ class WallpaperEditor(
      *
      * Antes, uma imagem como 1080x2400 podia virar 921x2048 porque
      * displayMetrics.widthPixels/heightPixels eram usados como alvo.
+     *
      * Depois o Android precisava ampliar novamente essa cópia menor.
      *
      * Agora preservamos os pixels do arquivo original e deixamos o editor
@@ -88,10 +96,16 @@ class WallpaperEditor(
 
         context.contentResolver.openInputStream(sourceUri).use { input ->
             if (input == null) {
-                throw Exception("Não foi possível abrir a imagem.")
+                throw Exception(
+                    "Não foi possível abrir a imagem."
+                )
             }
 
-            BitmapFactory.decodeStream(input, null, bounds)
+            BitmapFactory.decodeStream(
+                input,
+                null,
+                bounds
+            )
         }
 
         if (bounds.outWidth <= 0 || bounds.outHeight <= 0) {
@@ -107,20 +121,30 @@ class WallpaperEditor(
         activity: Activity,
         imageUri: Uri
     ) {
-        val wallpaperManager = WallpaperManager.getInstance(context)
+        val wallpaperManager =
+            WallpaperManager.getInstance(context)
 
         val intent = try {
-            wallpaperManager.getCropAndSetWallpaperIntent(imageUri)
+            wallpaperManager.getCropAndSetWallpaperIntent(
+                imageUri
+            )
         } catch (error: IllegalArgumentException) {
             createExplicitCropIntent(imageUri)
                 ?: throw Exception(
                     "Não foi possível abrir o editor nativo de wallpaper: " +
-                        (error.message ?: "nenhum editor compatível foi encontrado.")
+                        (error.message
+                            ?: "nenhum editor compatível foi encontrado.")
                 )
         }
 
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        intent.clipData = ClipData.newRawUri("wallpaper", imageUri)
+        intent.addFlags(
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+
+        intent.clipData = ClipData.newRawUri(
+            "wallpaper",
+            imageUri
+        )
 
         try {
             activity.startActivity(intent)
@@ -141,17 +165,32 @@ class WallpaperEditor(
         val intent = Intent(
             WallpaperManager.ACTION_CROP_AND_SET_WALLPAPER
         ).apply {
-            setDataAndType(imageUri, "image/*")
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            clipData = ClipData.newRawUri("wallpaper", imageUri)
+            setDataAndType(
+                imageUri,
+                "image/*"
+            )
+
+            addFlags(
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+
+            clipData = ClipData.newRawUri(
+                "wallpaper",
+                imageUri
+            )
         }
 
-        val activities = context.packageManager.queryIntentActivities(
-            intent,
-            0
-        )
+        val activities =
+            context.packageManager.queryIntentActivities(
+                intent,
+                0
+            )
 
-        return if (activities.isNotEmpty()) intent else null
+        return if (activities.isNotEmpty()) {
+            intent
+        } else {
+            null
+        }
     }
 
     private fun validateWallpaperUri(
@@ -163,9 +202,13 @@ class WallpaperEditor(
             )
         }
 
-        val mimeType = context.contentResolver.getType(uri)
+        val mimeType =
+            context.contentResolver.getType(uri)
 
-        if (mimeType == null || !mimeType.startsWith("image/")) {
+        if (
+            mimeType == null ||
+            !mimeType.startsWith("image/")
+        ) {
             throw Exception(
                 "O ContentProvider retornou MIME inválido para o wallpaper: " +
                     (mimeType ?: "null")

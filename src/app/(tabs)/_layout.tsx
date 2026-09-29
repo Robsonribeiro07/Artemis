@@ -20,9 +20,8 @@ export default function TabsLayout() {
       </View>
 
       <TabList style={{ display: "none" }}>
+        <TabTrigger name="explore" href="/explorer" />
         <TabTrigger name="home" href="/home" />
-
-        <TabTrigger name="explore" href="/explore" />
 
         <TabTrigger name="favorites" href="/favorites" />
 

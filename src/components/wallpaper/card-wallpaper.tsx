@@ -1,11 +1,11 @@
+import { useDownloadedWallpaper } from "@/hooks/wallapapers/use-downloaded-wallaper";
 import { Box } from "@/components/ui/box";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Image } from "expo-image";
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { FeaturedDetails } from "../screens/Home/featured/featured-details";
+
 type FeaturedCardProps = {
-  isDownloaded: boolean;
-  downloadedUri?: string;
   onDownload: (imageUrl: string) => void | Promise<void>;
   onOpenDownloaded: (uri?: string) => void;
   variant: "home" | "explore";
@@ -19,13 +19,33 @@ function CardWallpaper({
   imageUrl,
   category,
   thumbnailUrl,
-  isDownloaded,
-  downloadedUri,
   onDownload,
   onOpenDownloaded,
   wihoutCategory,
 }: FeaturedCardProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const { isDownloaded, downloadedUri } = useDownloadedWallpaper(imageUrl);
+  const [loadedThumbnail, setLoadedThumbnail] = useState<string | null>(null);
+
+  // The loaded state belongs to the current source. FlatList can reuse a cell
+  // for another item, so a plain boolean could incorrectly stay true.
+  const imageLoaded = loadedThumbnail === thumbnailUrl;
+
+  const handleLoad = useCallback(() => {
+    setLoadedThumbnail(thumbnailUrl);
+  }, [thumbnailUrl]);
+
+  const handleError = useCallback(() => {
+    // Do not leave the skeleton forever when the remote image fails.
+    setLoadedThumbnail(thumbnailUrl);
+  }, [thumbnailUrl]);
+
+  const handleDownload = useCallback(() => {
+    void onDownload(imageUrl);
+  }, [imageUrl, onDownload]);
+
+  const handleOpenDownloaded = useCallback(() => {
+    onOpenDownloaded(downloadedUri);
+  }, [downloadedUri, onOpenDownloaded]);
 
   return (
     <Box className="relative h-full w-full overflow-hidden rounded-2xl">
@@ -42,14 +62,8 @@ function CardWallpaper({
         contentFit="cover"
         allowDownscaling
         cachePolicy="memory-disk"
-        onLoad={() => {
-          setTimeout(() => {
-            setImageLoaded(true);
-          }, 300);
-        }}
-        onError={() => {
-          setImageLoaded(true);
-        }}
+        onLoad={handleLoad}
+        onError={handleError}
       />
 
       {!imageLoaded && (
@@ -60,8 +74,8 @@ function CardWallpaper({
         <FeaturedDetails
           category={category}
           isDowloaded={isDownloaded}
-          onHandlePressDowload={() => onDownload(imageUrl)}
-          onHandlePressOpenEditor={() => onOpenDownloaded(downloadedUri)}
+          onHandlePressDowload={handleDownload}
+          onHandlePressOpenEditor={handleOpenDownloaded}
           wihoutCategory={wihoutCategory}
         />
       </Box>

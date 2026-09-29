@@ -1,29 +1,41 @@
+import { useGetAllWallpaperForCategory } from "@/api/wallpapers/hooks/use-get-all-wallpaper-for-category copy";
 import { useWallpaperActions } from "@/hooks/wallapapers/use-wallpaper-actions";
+import { useAllWallpaperForCategoryStore } from "@/store/wallpapers/use-state-all-walpaper-explorer";
+import { useCallback } from "react";
+import { ListRenderItemInfo } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-
 import {
   Actionsheet,
   ActionsheetBackdrop,
   ActionsheetContent,
 } from "../ui/actionsheet";
-
-import { useGetAllWallpaperForCategory } from "@/api/wallpapers/hooks/use-get-all-wallpaper-for-category";
-
-import { useAllWallpaperForCategoryStore } from "@/store/wallpapers/use-state-all-walpaper-explorer";
 import { Box } from "../ui/box";
 import CardWallpaper from "./card-wallpaper";
 
 export function AllWallpaperForCategory() {
-  const {
-    handleDownloadWallpaper,
-    handleOpenDownloadedWallpaper,
-    isDownloaded,
-    getDownloadedUri,
-  } = useWallpaperActions();
-  const { isOpen, onClose } = useAllWallpaperForCategoryStore();
+  const { handleDownloadWallpaper, handleOpenDownloadedWallpaper } =
+    useWallpaperActions();
+  const isOpen = useAllWallpaperForCategoryStore((state) => state.isOpen);
+  const onClose = useAllWallpaperForCategoryStore((state) => state.onClose);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useGetAllWallpaperForCategory();
+
+  const renderItem = useCallback(
+    ({ item: wallpaper }: ListRenderItemInfo<NonNullable<typeof data>["wallpapers"][number]>) => (
+      <Box className="flex-1 h-72">
+        <CardWallpaper
+          category={wallpaper.category}
+          imageUrl={wallpaper.imageUrl}
+          thumbnailUrl={wallpaper.thumbnailUrl}
+          onDownload={handleDownloadWallpaper}
+          onOpenDownloaded={handleOpenDownloadedWallpaper}
+          variant="explore"
+        />
+      </Box>
+    ),
+    [handleDownloadWallpaper, handleOpenDownloadedWallpaper],
+  );
 
   return (
     <Actionsheet isOpen={isOpen} snapPoints={[80]} onClose={onClose}>
@@ -50,7 +62,7 @@ export function AllWallpaperForCategory() {
           onEndReachedThreshold={0.5}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
+              void fetchNextPage();
             }
           }}
           contentContainerStyle={{
@@ -62,20 +74,7 @@ export function AllWallpaperForCategory() {
             marginBottom: 12,
           }}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item: wallpaper }) => (
-            <Box className="flex-1 h-72">
-              <CardWallpaper
-                category={wallpaper.category}
-                imageUrl={wallpaper.imageUrl}
-                thumbnailUrl={wallpaper.thumbnailUrl}
-                onDownload={handleDownloadWallpaper}
-                onOpenDownloaded={handleOpenDownloadedWallpaper}
-                isDownloaded={isDownloaded(wallpaper.imageUrl)}
-                variant="explore"
-                downloadedUri={getDownloadedUri(wallpaper.imageUrl)}
-              />
-            </Box>
-          )}
+          renderItem={renderItem}
         />
       </ActionsheetContent>
     </Actionsheet>

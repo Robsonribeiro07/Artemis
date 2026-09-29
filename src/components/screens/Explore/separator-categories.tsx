@@ -1,49 +1,66 @@
-// separator-categories.tsx
-
 import { IWallpaperResponse } from "@/api/wallpapers/helpers/type";
 import { Carousel } from "@/components/Carousel";
 import { ThemedText } from "@/components/themedText";
 import { Box } from "@/components/ui/box";
 import CardWallpaper from "@/components/wallpaper/card-wallpaper";
 import { useAllWallpaperForCategoryStore } from "@/store/wallpapers/use-state-all-walpaper-explorer";
+import { router } from "expo-router/build/global-state/router";
 import { ChevronRight } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { TouchableOpacity, useWindowDimensions, View } from "react-native";
 
 type SeparatorCategoriesProps = {
   category: string;
   wallpapers: IWallpaperResponse[];
-  isDownloaded: (imageUrl: string) => boolean;
-  getDownloadedUri: (imageUrl: string) => string | undefined;
   onDownload: (imageUrl: string) => Promise<void>;
   onOpenDownloaded: (uri?: string) => void;
 };
 
-export function SeparatorCategories({
+export const SeparatorCategories = memo(function SeparatorCategories({
   category,
   wallpapers,
-  isDownloaded,
-  getDownloadedUri,
   onDownload,
   onOpenDownloaded,
 }: SeparatorCategoriesProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { height } = useWindowDimensions();
-  const { openCategory, isOpen } = useAllWallpaperForCategoryStore();
+  const setCategory = useAllWallpaperForCategoryStore(
+    (state) => state.setCategory,
+  );
   const carouselHeight = height / 3;
+
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [wallpapers]);
+    setCurrentIndex((previousIndex) =>
+      Math.min(previousIndex, Math.max(0, wallpapers.length - 1)),
+    );
+  }, [wallpapers.length]);
+
+  const handleOpenCategory = useCallback(() => {
+    setCategory(category);
+    router.navigate("/(tabs)/explorer/subcategory");
+  }, [category, setCategory]);
+
+  const renderWallpaper = useCallback(
+    (item: IWallpaperResponse) => (
+      <CardWallpaper
+        variant="explore"
+        category={item.category}
+        key={item._id}
+        imageUrl={item.imageUrl}
+        thumbnailUrl={item.thumbnailUrl}
+        onDownload={onDownload}
+        onOpenDownloaded={onOpenDownloaded}
+        wihoutCategory
+      />
+    ),
+    [onDownload, onOpenDownloaded],
+  );
 
   return (
-    <Box
-      style={{
-        minWidth: "100%",
-      }}
-    >
+    <Box style={{ minWidth: "100%" }}>
       <TouchableOpacity
         className="flex-row items-center relative"
-        onPress={() => openCategory(category)}
+        onPress={handleOpenCategory}
       >
         <ThemedText size="lg" weight="bold" className="mt-3">
           {category.toLocaleUpperCase()}
@@ -57,6 +74,7 @@ export function SeparatorCategories({
           }}
         />
       </TouchableOpacity>
+
       <View
         style={{
           width: "100%",
@@ -72,22 +90,11 @@ export function SeparatorCategories({
           itemHeight={carouselHeight}
           gap={30}
           withoutIndicator
-          renderItem={(item) => (
-            <CardWallpaper
-              variant="explore"
-              category={item.category}
-              key={item._id}
-              imageUrl={item.portraitUrl}
-              thumbnailUrl={item.thumbnailUrl}
-              isDownloaded={isDownloaded(item.imageUrl)}
-              downloadedUri={getDownloadedUri(item.imageUrl)}
-              onDownload={onDownload}
-              onOpenDownloaded={onOpenDownloaded}
-              wihoutCategory
-            />
-          )}
+          initialNumberToRender={3}
+          windowSize={3}
+          renderItem={renderWallpaper}
         />
       </View>
     </Box>
   );
-}
+});

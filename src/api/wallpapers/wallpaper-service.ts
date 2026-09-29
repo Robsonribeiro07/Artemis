@@ -9,10 +9,18 @@ import {
   getAllWallpaperHelper,
   IGetAllWallpapersParams,
 } from "./helpers/get-all-wallpaper-helper";
+import {
+  getAllWallpaperForSubCategoryHelper,
+  IGetAllWallpapersForSubCategoryParams,
+} from "./helpers/get-wallpaper-subcategory";
 
 type GetAllWallpapersParams = Omit<IGetAllWallpapersParams, "api">;
 type GetAllWallpapersForCategoryParams = Omit<
   IGetAllWallpapersForCategoryParams,
+  "api"
+>;
+type GetAllWallpapersForSubCategoryParams = Omit<
+  IGetAllWallpapersForSubCategoryParams,
   "api"
 >;
 
@@ -27,8 +35,6 @@ export class WallpaperService {
     this.api = api({
       token: this.token,
     });
-
-    console.log("API:", this.api.defaults.baseURL);
   }
 
   async getAllWallpapers({
@@ -56,6 +62,14 @@ export class WallpaperService {
       category,
       page,
       limit,
+      api: this.api,
+    });
+  }
+  async getAllWallpaperForSubCategory({
+    category,
+  }: GetAllWallpapersForSubCategoryParams) {
+    return await getAllWallpaperForSubCategoryHelper({
+      category,
       api: this.api,
     });
   }

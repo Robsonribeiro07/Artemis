@@ -16,6 +16,7 @@ export interface IWallpaperResponse {
   thumbnailUrl: string;
   portraitUrl: string;
 }
+
 export interface IGetWallpaperForCategoryResponse {
   wallpapers: IWallpaperResponse[];
   pagination: {
@@ -27,15 +28,19 @@ export interface IGetWallpaperForCategoryResponse {
   };
 }
 
-interface ICategoriesResponse {
+export interface IWallpaperSubcategoryResponse {
+  subcategory: string;
+  wallpaper: IWallpaperResponse;
+}
+
+export interface ICategoriesResponse {
   category: string;
-  wallpapers: IWallpaperResponse[];
+  subcategories: IWallpaperSubcategoryResponse[];
 }
 
 export interface IGetWallpaperResponse {
   wallpapers: IWallpaperResponse[];
   categories: ICategoriesResponse[];
-
   pagination: {
     page: number;
     limit: number;

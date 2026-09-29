@@ -21,6 +21,7 @@ export function useGetAllWallpapers() {
       });
     },
     refetchOnWindowFocus: false,
+    staleTime: Infinity,
   });
 
   return {

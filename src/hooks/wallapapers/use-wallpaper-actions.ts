@@ -1,17 +1,18 @@
-import { useGetAllWallpapers } from "@/api/wallpapers/hooks/use-get-wallpaper";
 import ExpoWallpaperModule from "@/modules/expo-wallpaper/src/ExpoWallpaperModule";
+import { useDownloadedWallpaperStore } from "@/store/wallpapers/use-downloaded-wallpaper";
 import { useWallpaperStore } from "@/store/wallpapers/use-wallpapers-store";
 import { useCallback } from "react";
-import { useDownloadedWallpapers } from "./use-downloaded-wallaper";
 
 export function useWallpaperActions() {
-  const { setStateModal, setSelectedWallpaperUri, setBehavior } =
-    useWallpaperStore();
+  const setStateModal = useWallpaperStore((state) => state.setStateModal);
+  const setSelectedWallpaperUri = useWallpaperStore(
+    (state) => state.setSelectedWallpaperUri,
+  );
+  const setBehavior = useWallpaperStore((state) => state.setBehavior);
 
-  const { isDownloaded, getDownloadedUri, addDownloadedWallpaper } =
-    useDownloadedWallpapers();
-
-  const { data, isFetched, isLoading } = useGetAllWallpapers();
+  const addDownloadedWallpaper = useDownloadedWallpaperStore(
+    (state) => state.addDownloadedWallpaper,
+  );
 
   const handleDownloadWallpaper = useCallback(
     async (imageUrl: string): Promise<void> => {
@@ -24,7 +25,7 @@ export function useWallpaperActions() {
         const result = await ExpoWallpaperModule.downloadWallpaper(imageUrl);
 
         addDownloadedWallpaper(imageUrl, result.uri);
-      } catch (error) {
+      } catch {
         setStateModal(false);
       }
     },
@@ -39,16 +40,11 @@ export function useWallpaperActions() {
       setStateModal(true);
       setSelectedWallpaperUri(uri);
     },
-    [setBehavior, setStateModal, setSelectedWallpaperUri],
+    [setBehavior, setSelectedWallpaperUri, setStateModal],
   );
 
   return {
     handleDownloadWallpaper,
     handleOpenDownloadedWallpaper,
-    isDownloaded,
-    getDownloadedUri,
-    data,
-    isFetched,
-    isLoading,
   };
 }
